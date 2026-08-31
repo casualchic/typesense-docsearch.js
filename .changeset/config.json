@@ -10,8 +10,7 @@
       "typesense-docsearch-modal",
       "typesense-docsearch-react",
       "typesense-docsearch-sidepanel",
-      "typesense-docsearch-sidepanel-js",
-      "typesense-docsearch-docusaurus-adapter"
+      "typesense-docsearch-sidepanel-js"
     ]
   ],
   "linked": [],
@@ -19,7 +18,6 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@docsearch/website",
     "@docsearch/react-example",
     "@docsearch/js-example"
   ]
