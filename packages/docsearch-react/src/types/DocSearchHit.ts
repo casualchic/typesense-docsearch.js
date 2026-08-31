@@ -1,4 +1,5 @@
 type ContentType =
+  | 'askAI'
   | 'content'
   | 'lvl0'
   | 'lvl1'
@@ -29,6 +30,13 @@ interface DocSearchHitHighlightResult {
   content: DocSearchHitAttributeHighlightResult;
   hierarchy: DocSearchHitHighlightResultHierarchy;
   hierarchy_camel: DocSearchHitHighlightResultHierarchy[];
+  'hierarchy.lvl0'?: DocSearchHitAttributeHighlightResult;
+  'hierarchy.lvl1'?: DocSearchHitAttributeHighlightResult;
+  'hierarchy.lvl2'?: DocSearchHitAttributeHighlightResult;
+  'hierarchy.lvl3'?: DocSearchHitAttributeHighlightResult;
+  'hierarchy.lvl4'?: DocSearchHitAttributeHighlightResult;
+  'hierarchy.lvl5'?: DocSearchHitAttributeHighlightResult;
+  'hierarchy.lvl6'?: DocSearchHitAttributeHighlightResult;
 }
 
 interface DocSearchHitAttributeSnippetResult {
@@ -40,22 +48,39 @@ interface DocSearchHitSnippetResult {
   content: DocSearchHitAttributeSnippetResult;
   hierarchy: DocSearchHitHighlightResultHierarchy;
   hierarchy_camel: DocSearchHitHighlightResultHierarchy[];
+  'hierarchy.lvl0'?: DocSearchHitAttributeSnippetResult;
+  'hierarchy.lvl1'?: DocSearchHitAttributeSnippetResult;
+  'hierarchy.lvl2'?: DocSearchHitAttributeSnippetResult;
+  'hierarchy.lvl3'?: DocSearchHitAttributeSnippetResult;
+  'hierarchy.lvl4'?: DocSearchHitAttributeSnippetResult;
+  'hierarchy.lvl5'?: DocSearchHitAttributeSnippetResult;
+  'hierarchy.lvl6'?: DocSearchHitAttributeSnippetResult;
 }
 
 export declare type DocSearchHit = {
   objectID: string;
   content: string | null;
+  query?: string;
   url: string;
   url_without_anchor: string;
   type: ContentType;
   anchor: string | null;
-  'hierarchy.lvl0': string;
-  'hierarchy.lvl1': string;
-  'hierarchy.lvl2': string | null;
-  'hierarchy.lvl3': string | null;
-  'hierarchy.lvl4': string | null;
-  'hierarchy.lvl5': string | null;
-  'hierarchy.lvl6': string | null;
+  hierarchy: {
+    lvl0: string;
+    lvl1: string;
+    lvl2: string | null;
+    lvl3: string | null;
+    lvl4: string | null;
+    lvl5: string | null;
+    lvl6: string | null;
+  };
+  'hierarchy.lvl0'?: string;
+  'hierarchy.lvl1'?: string;
+  'hierarchy.lvl2'?: string | null;
+  'hierarchy.lvl3'?: string | null;
+  'hierarchy.lvl4'?: string | null;
+  'hierarchy.lvl5'?: string | null;
+  'hierarchy.lvl6'?: string | null;
   _highlightResult: DocSearchHitHighlightResult;
   _snippetResult: DocSearchHitSnippetResult;
   _rankingInfo?: {
@@ -76,4 +101,11 @@ export declare type DocSearchHit = {
     };
   };
   _distinctSeqID?: number;
+  __autocomplete_indexName?: string;
+  __autocomplete_queryID?: string;
+  __autocomplete_algoliaCredentials?: {
+    appId: string;
+    apiKey: string;
+  };
+  __autocomplete_id?: number;
 };

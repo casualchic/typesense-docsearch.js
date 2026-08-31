@@ -1,0 +1,48 @@
+{
+  "name": "typesense-docsearch-sidepanel-js",
+  "description": "Sidepanel JS package for DocSearch, customized to work with Typesense",
+  "version": "5.0.2",
+  "license": "MIT",
+  "homepage": "https://typesense.org/docs/latest/guide/docsearch.html",
+  "repository": "typesense/docsearch.js",
+  "contributors": [
+    {
+      "name": "Algolia, Inc.",
+      "url": "https://www.algolia.com"
+    },
+    {
+      "name": "Typesense, Inc.",
+      "url": "https://typesense.org"
+    }
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/"
+  ],
+  "source": "src/index.ts",
+  "types": "dist/esm/index.d.ts",
+  "module": "dist/esm/index.js",
+  "main": "dist/umd/index.js",
+  "umd:main": "dist/umd/index.js",
+  "unpkg": "dist/umd/index.js",
+  "jsdelivr": "dist/umd/index.js",
+  "scripts": {
+    "build": "tsdown",
+    "watch": "tsdown --watch"
+  },
+  "devDependencies": {
+    "preact": "11.0.0-beta.0",
+    "tsdown": "0.22.7",
+    "typescript": "5.7.3",
+    "typesense-docsearch-core": "5.0.2",
+    "typesense-docsearch-react": "5.0.2"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "typesense-docsearch-react"
+    ]
+  }
+}

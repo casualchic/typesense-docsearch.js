@@ -1,7 +1,8 @@
 [build]
-  command="yarn build"
-  publish="packages/website/build"
-  ignore="git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- packages/website/ yarn.lock"
+command = "bun install --frozen-lockfile && bun run build && bun run playground:build"
 
-[build.environment]
-  YARN_VERSION = "1.22.5"
+[[redirects]]
+from = "/apply/"
+to = "https://dashboard.algolia.com/users/sign_up?selected_plan=docsearch&utm_source=docsearch.algolia.com&utm_medium=referral&utm_campaign=docsearch&utm_content=apply"
+status = 301
+force = true

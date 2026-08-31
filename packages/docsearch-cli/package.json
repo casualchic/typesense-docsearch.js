@@ -1,0 +1,59 @@
+{
+  "name": "typesense-docsearch-cli",
+  "description": "CLI for DocSearch, customized to work with Typesense",
+  "version": "0.0.2",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://typesense.org/docs/latest/guide/docsearch.html",
+  "repository": "typesense/docsearch.js",
+  "contributors": [
+    {
+      "name": "Algolia, Inc.",
+      "url": "https://www.algolia.com"
+    },
+    {
+      "name": "Typesense, Inc.",
+      "url": "https://typesense.org"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/algolia/docsearch/issues"
+  },
+  "bin": {
+    "docsearch": "./dist/index.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "algolia",
+    "cli",
+    "documentation",
+    "docsearch",
+    "mcp"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "bun run clean && tsc --project tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prepack": "bun run build",
+    "test": "vitest run --config vitest.config.mts",
+    "test:pack": "npm pack --dry-run",
+    "watch": "tsc --project tsconfig.json --watch"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "jsonc-parser": "^3.3.1",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "5.7.3",
+    "vitest": "3.0.2"
+  }
+}

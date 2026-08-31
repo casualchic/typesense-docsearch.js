@@ -1,0 +1,148 @@
+import type { JSX } from 'react';
+import React from 'react';
+import { createPortal } from 'react-dom';
+import { DocSearch, useDocSearch } from 'typesense-docsearch-core';
+import type {
+  DocSearchCallbacks,
+  DocSearchRef,
+  DocSearchTheme,
+  SidepanelShortcuts,
+} from 'typesense-docsearch-core';
+import type { ConfigurationOptions as TypesenseConfigurationOptions } from 'typesense/lib/Typesense/Configuration';
+
+import type { DocSearchAskAi } from './DocSearchAI';
+import type {
+  SidepanelButtonProps,
+  SidepanelProps as SidepanelPanelProps,
+} from './Sidepanel/index';
+import { SidepanelButton, Sidepanel } from './Sidepanel/index';
+
+export type {
+  DocSearchRef,
+  DocSearchCallbacks,
+} from 'typesense-docsearch-core';
+
+export type DocSearchSidepanelProps = DocSearchCallbacks & {
+  /** Typesense server configuration used by sidepanel search. */
+  typesenseServerConfig: TypesenseConfigurationOptions;
+  /** Typesense collection name used for keyword search. */
+  typesenseCollectionName: string;
+  /** Typesense conversational search configuration. */
+  askAi: DocSearchAskAi;
+  /**
+   * Configuration for keyboard shortcuts. Allows enabling/disabling specific
+   * shortcuts.
+   *
+   * @default `{ 'Ctrl/Cmd+I': true }`
+   */
+  keyboardShortcuts?: SidepanelShortcuts;
+  /**
+   * Theme overrides applied to the Sidepanel button and panel.
+   *
+   * @default 'light'
+   */
+  theme?: DocSearchTheme;
+  /** Props specific to the Sidepanel button. */
+  button?: Omit<SidepanelButtonProps, 'keyboardShortcuts'>;
+  /** Props specific to the Sidepanel panel. */
+  panel?: Omit<SidepanelPanelProps, 'keyboardShortcuts'>;
+};
+
+function DocSearchSidepanelComponent(
+  {
+    keyboardShortcuts,
+    theme,
+    onReady,
+    onOpen,
+    onClose,
+    onSidepanelOpen,
+    onSidepanelClose,
+    ...props
+  }: DocSearchSidepanelProps,
+  ref: React.ForwardedRef<DocSearchRef>
+): JSX.Element {
+  return (
+    <DocSearch
+      keyboardShortcuts={keyboardShortcuts}
+      theme={theme}
+      ref={ref}
+      onReady={onReady}
+      onOpen={onOpen}
+      onClose={onClose}
+      onSidepanelOpen={onSidepanelOpen}
+      onSidepanelClose={onSidepanelClose}
+    >
+      <DocSearchSidepanelComp {...props} />
+    </DocSearch>
+  );
+}
+
+export const DocSearchSidepanel = React.forwardRef(DocSearchSidepanelComponent);
+
+function DocSearchSidepanelComp({
+  button: buttonProps = {},
+  panel: { portalContainer, ...panelProps } = {},
+  ...rootProps
+}: DocSearchSidepanelProps): JSX.Element {
+  const {
+    docsearchState,
+    setDocsearchState,
+    keyboardShortcuts,
+    registerView,
+    initialAskAiMessage,
+  } = useDocSearch();
+
+  const toggleSidepanelState = React.useCallback(() => {
+    setDocsearchState(docsearchState === 'sidepanel' ? 'ready' : 'sidepanel');
+  }, [docsearchState, setDocsearchState]);
+
+  const handleClose = (): void => {
+    setDocsearchState('ready');
+  };
+
+  const handleOpen = (): void => {
+    setDocsearchState('sidepanel');
+  };
+
+  const containerElement = React.useMemo(
+    () => portalContainer ?? document.body,
+    [portalContainer]
+  );
+
+  React.useEffect(() => {
+    registerView('sidepanel');
+  }, [registerView]);
+
+  const ButtonComp = React.useMemo(
+    () => (
+      <SidepanelButton
+        keyboardShortcuts={keyboardShortcuts}
+        onClick={toggleSidepanelState}
+        {...buttonProps}
+      />
+    ),
+    [keyboardShortcuts, toggleSidepanelState, buttonProps]
+  );
+
+  return (
+    <>
+      {buttonProps.variant === 'inline'
+        ? ButtonComp
+        : createPortal(ButtonComp, containerElement)}
+      {createPortal(
+        <Sidepanel
+          initialMessage={initialAskAiMessage}
+          isOpen={docsearchState === 'sidepanel'}
+          onClose={handleClose}
+          onOpen={handleOpen}
+          {...rootProps}
+          {...panelProps}
+          keyboardShortcuts={keyboardShortcuts}
+        />,
+        containerElement
+      )}
+    </>
+  );
+}
+
+export * from './Sidepanel/index';

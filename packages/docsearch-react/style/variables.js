@@ -1,1 +1,1 @@
-export * from 'typsense-docsearch-css/css/dist/_variables.css';
+export * from 'typesense-docsearch-css/dist/_variables.css';

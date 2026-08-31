@@ -1,7 +1,7 @@
 {
   "name": "typesense-docsearch.js",
-  "description": "JavaScript package for DocSearch, adapted to work with Typesense",
-  "version": "3.4.1",
+  "description": "DocSearch, customized to work with Typesense",
+  "version": "5.0.2",
   "license": "MIT",
   "homepage": "https://typesense.org/docs/latest/guide/docsearch.html",
   "repository": "typesense/docsearch.js",
@@ -19,6 +19,10 @@
   "files": [
     "dist/"
   ],
+  "exports": {
+    ".": "./dist/esm/index.js",
+    "./docsearch": "./dist/esm/docsearch.js"
+  },
   "source": "src/index.ts",
   "types": "dist/esm/index.d.ts",
   "module": "dist/esm/index.js",
@@ -27,16 +31,20 @@
   "unpkg": "dist/umd/index.js",
   "jsdelivr": "dist/umd/index.js",
   "scripts": {
-    "build:clean": "rm -rf ./dist",
-    "build:esm": "cross-env BUILD=esm rollup --config",
-    "build:types": "tsc -p ./tsconfig.declaration.json --outDir ./dist/esm",
-    "build:umd": "cross-env BUILD=umd rollup --config",
-    "build": "yarn build:clean && yarn build:umd && yarn build:esm && yarn build:types",
-    "on:change": "concurrently \"yarn build:esm\" \"yarn build:types\"",
-    "watch": "watch \"yarn on:change\" --ignoreDirectoryPattern \"/dist/\""
+    "build": "tsdown",
+    "watch": "tsdown --watch"
   },
-  "dependencies": {
-    "preact": "^10.0.0",
-    "typesense-docsearch-react": "3.4.1"
+  "devDependencies": {
+    "htm": "3.1.1",
+    "preact": "11.0.0-beta.0",
+    "tsdown": "0.22.7",
+    "typescript": "5.7.3",
+    "typesense-docsearch-core": "5.0.2",
+    "typesense-docsearch-react": "5.0.2"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "typesense-docsearch-react"
+    ]
   }
 }

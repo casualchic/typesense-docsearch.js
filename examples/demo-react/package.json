@@ -1,0 +1,28 @@
+{
+  "name": "@docsearch/react-example",
+  "description": "DocSearch v4 React example",
+  "version": "4.6.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@algolia/autocomplete-core": "1.19.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typesense-docsearch-core": "workspace:*",
+    "typesense-docsearch-css": "workspace:*",
+    "typesense-docsearch-modal": "workspace:*",
+    "typesense-docsearch-react": "workspace:*",
+    "typesense-docsearch-sidepanel": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "5.7.3",
+    "vite": "^6.0.7"
+  }
+}

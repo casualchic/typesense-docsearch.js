@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 
 import { ErrorIcon } from './icons';
 
@@ -11,7 +11,9 @@ type ErrorScreenProps = {
   translations?: ErrorScreenTranslations;
 };
 
-export function ErrorScreen({ translations = {} }: ErrorScreenProps) {
+export function ErrorScreen({
+  translations = {},
+}: ErrorScreenProps): JSX.Element {
   const {
     titleText = 'Unable to fetch results',
     helpText = 'You might want to check your network connection.',

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 
-export function SelectIcon() {
+export function SelectIcon(): JSX.Element {
   return (
     <svg
       className="DocSearch-Hit-Select-Icon"

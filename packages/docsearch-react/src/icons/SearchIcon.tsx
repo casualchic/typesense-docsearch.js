@@ -1,18 +1,34 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 
-export function SearchIcon() {
+interface SearchIconProps {
+  size?: number;
+  color?: string;
+}
+
+export function SearchIcon({
+  size = 20,
+  color = 'currentColor',
+}: SearchIconProps): JSX.Element {
   return (
     <svg
-      width="20"
-      height="20"
+      width={size}
+      height={size}
       className="DocSearch-Search-Icon"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
     >
-      <path
-        d="M14.386 14.386l4.0877 4.0877-4.0877-4.0877c-2.9418 2.9419-7.7115 2.9419-10.6533 0-2.9419-2.9418-2.9419-7.7115 0-10.6533 2.9418-2.9419 7.7115-2.9419 10.6533 0 2.9419 2.9418 2.9419 7.7115 0 10.6533z"
-        stroke="currentColor"
+      <circle
+        cx="11"
+        cy="11"
+        r="8"
+        stroke={color}
         fill="none"
-        fillRule="evenodd"
+        strokeWidth="1.4"
+      />
+      <path
+        d="m21 21-4.3-4.3"
+        stroke={color}
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

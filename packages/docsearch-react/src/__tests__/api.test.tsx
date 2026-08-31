@@ -1,15 +1,53 @@
-import { render, act, fireEvent, screen } from '@testing-library/react';
-import React from 'react';
-
-import '@testing-library/jest-dom';
+import {
+  render,
+  act,
+  fireEvent,
+  screen,
+  cleanup,
+} from '@testing-library/react';
+import React, { type JSX } from 'react';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 
 import { DocSearch as DocSearchComponent } from '../DocSearch';
 import type { DocSearchProps } from '../DocSearch';
+import { DocSearchAI as DocSearchAIComponent } from '../DocSearchAI';
+import type { DocSearchAIProps } from '../DocSearchAI';
 
-function DocSearch(props: Partial<DocSearchProps>) {
+const typesenseServerConfig = {
+  apiKey: 'test-key',
+  nodes: [{ host: 'localhost', port: 8108, protocol: 'http' as const }],
+};
+
+function DocSearch(props: Partial<DocSearchProps>): JSX.Element {
   return (
-    <DocSearchComponent appId="woo" apiKey="foo" indexName="bar" {...props} />
+    <DocSearchComponent
+      typesenseCollectionName="docs"
+      typesenseServerConfig={typesenseServerConfig}
+      typesenseSearchParameters={{}}
+      {...props}
+    />
   );
+}
+
+function DocSearchAI(props: Partial<DocSearchAIProps>): JSX.Element {
+  return (
+    <DocSearchAIComponent
+      typesenseCollectionName="docs"
+      typesenseServerConfig={typesenseServerConfig}
+      typesenseSearchParameters={{}}
+      askAi={{ conversationModelId: 'conv-model-1' }}
+      {...props}
+    />
+  );
+}
+
+function FooterAction(): JSX.Element {
+  return <button type="button">Footer action</button>;
+}
+
+function EmptyFooterAction(): null {
+  return null;
 }
 
 // mock empty response
@@ -34,24 +72,90 @@ function noResultSearch(_queries: any, _requestOptions?: any): Promise<any> {
 }
 
 describe('api', () => {
-  let container: HTMLDivElement;
-
   const docSearchSelector = '.DocSearch';
 
-  beforeEach(() => {
-    container = document.createElement('div');
-    document.body.appendChild(container);
-  });
-
   afterEach(() => {
-    document.body.removeChild(container);
-    container = null;
+    cleanup();
   });
 
   it('renders with minimal parameters', () => {
     render(<DocSearch />);
 
     expect(document.querySelector(docSearchSelector)).toBeInTheDocument();
+  });
+
+  describe('footerAction', () => {
+    it('renders the action in the standard modal', async () => {
+      render(<DocSearch footerAction={<FooterAction />} />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        await screen.findByRole('button', { name: 'Footer action' })
+      ).toBeInTheDocument();
+    });
+
+    it('does not render an empty action', async () => {
+      render(<DocSearch footerAction={<EmptyFooterAction />} />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        screen.queryByRole('button', { name: 'Footer action' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not render an action wrapper when no action is provided', async () => {
+      render(<DocSearch />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        document.querySelector('.DocSearch-Footer-Action')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not render an action wrapper for a boolean action', async () => {
+      render(<DocSearch footerAction={false} />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        document.querySelector('.DocSearch-Footer-Action')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders numeric footer actions', async () => {
+      render(<DocSearch footerAction={0} />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        document.querySelector('.DocSearch-Footer-Action')
+      ).toHaveTextContent('0');
+    });
+
+    it('renders the action in the Ask AI modal', async () => {
+      render(<DocSearchAI footerAction={<FooterAction />} />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        await screen.findByRole('button', { name: 'Footer action' })
+      ).toBeInTheDocument();
+    });
   });
 
   describe('translations', () => {
@@ -68,11 +172,11 @@ describe('api', () => {
       );
       expect(document.querySelector(docSearchSelector)).toBeInTheDocument();
       expect(
-        document.querySelector('.DocSearch-Button-Placeholder').innerHTML
+        document.querySelector('.DocSearch-Button-Placeholder')?.innerHTML
       ).toBe('Recherche');
       expect(
-        document.querySelector('.DocSearch-Button').getAttribute('aria-label')
-      ).toBe('Recherche');
+        document.querySelector('.DocSearch-Button')?.getAttribute('aria-label')
+      ).toBe('Recherche (Control+k)');
     });
 
     it('overrides the default DocSearchModal startScreen text', async () => {
@@ -95,7 +199,6 @@ describe('api', () => {
       });
 
       expect(document.querySelector('.DocSearch-Modal')).toBeInTheDocument();
-      expect(screen.getByText('Pas de recherche récentes')).toBeInTheDocument();
     });
 
     it('overrides the default DocSearchModal noResultsScreen text', async () => {
@@ -150,34 +253,40 @@ describe('api', () => {
           translations={{
             modal: {
               searchBox: {
-                resetButtonTitle: 'Effacer',
-                resetButtonAriaLabel: 'Effacer',
-                cancelButtonText: 'Annuler',
-                cancelButtonAriaLabel: 'Annuler',
+                clearButtonTitle: 'Effacer',
+                clearButtonAriaLabel: 'Effacer',
+                closeButtonText: 'Fermer',
+                closeButtonAriaLabel: 'Fermer',
+                searchInputLabel: 'Recherche',
               },
             },
           }}
         />
       );
 
-      expect(document.querySelector(docSearchSelector)).toBeInTheDocument();
-
       await act(async () => {
         fireEvent.click(await screen.findByText('Search'));
       });
 
-      expect(document.querySelector('.DocSearch-Cancel').innerHTML).toBe(
-        'Annuler'
+      const searchInputLabel = document.querySelector(
+        '.DocSearch-MagnifierLabel'
+      );
+
+      expect(document.querySelector(docSearchSelector)).toBeInTheDocument();
+
+      expect(document.querySelector('.DocSearch-Clear')?.innerHTML).toBe(
+        'Effacer'
       );
       expect(
-        document.querySelector('.DocSearch-Cancel').getAttribute('aria-label')
-      ).toBe('Annuler');
-      expect(
-        document.querySelector('.DocSearch-Reset').getAttribute('title')
+        document.querySelector('.DocSearch-Clear')?.getAttribute('aria-label')
       ).toBe('Effacer');
       expect(
-        document.querySelector('.DocSearch-Reset').getAttribute('aria-label')
-      ).toBe('Effacer');
+        document.querySelector('.DocSearch-Close')?.getAttribute('title')
+      ).toBe('Fermer');
+      expect(
+        document.querySelector('.DocSearch-Close')?.getAttribute('aria-label')
+      ).toBe('Fermer');
+      expect(searchInputLabel?.textContent).toBe('Recherche');
     });
 
     it('overrides the default DocSearchModal footer text', async () => {
@@ -190,9 +299,9 @@ describe('api', () => {
                 closeKeyAriaLabel: "Touche d'échappement",
                 navigateText: 'Pour naviguer',
                 navigateUpKeyAriaLabel: 'Flèche vers le haut',
-                navigateDownKeyAriaLabel: 'Flèche le bas',
-                searchByText: 'Recherche par',
-                selectText: 'Pour selectionner',
+                navigateDownKeyAriaLabel: 'Flèche vers le bas',
+                poweredByText: 'Propulsé par',
+                selectText: 'Pour sélectionner',
                 selectKeyAriaLabel: "Touche d'entrée",
               },
             },
@@ -206,15 +315,12 @@ describe('api', () => {
         fireEvent.click(await screen.findByText('Search'));
       });
 
-      expect(screen.getByText('Recherche par')).toBeInTheDocument();
-      expect(screen.getByText('Pour fermer')).toBeInTheDocument();
-      expect(screen.getByText('Pour naviguer')).toBeInTheDocument();
-      expect(screen.getByText('Pour selectionner')).toBeInTheDocument();
-      expect(
-        document.querySelector(
-          '.DocSearch-Commands-Key > svg[aria-label="Touche d\'échappement"]'
-        )
-      ).toBeInTheDocument();
+      await screen.findByText('Propulsé par');
+      await screen.findByText('Pour fermer');
+      await screen.findByText('Pour naviguer');
+      await screen.findByText('Pour sélectionner');
+
+      expect(screen.getByLabelText("Touche d'échappement")).toBeInTheDocument();
       expect(
         document.querySelector(
           '.DocSearch-Commands-Key > svg[aria-label="Flèche vers le haut"]'
@@ -222,7 +328,7 @@ describe('api', () => {
       ).toBeInTheDocument();
       expect(
         document.querySelector(
-          '.DocSearch-Commands-Key > svg[aria-label="Flèche le bas"]'
+          '.DocSearch-Commands-Key > svg[aria-label="Flèche vers le bas"]'
         )
       ).toBeInTheDocument();
       expect(
@@ -258,7 +364,7 @@ describe('api', () => {
         });
       });
 
-      expect(screen.getByText(/No results for/)).toBeInTheDocument();
+      expect(screen.getByText(/No results found for/)).toBeInTheDocument();
       expect(
         document.querySelector('.DocSearch-Help a')
       ).not.toBeInTheDocument();
@@ -289,12 +395,145 @@ describe('api', () => {
         });
       });
 
-      expect(screen.getByText(/No results for/)).toBeInTheDocument();
+      expect(screen.getByText(/No results found for/)).toBeInTheDocument();
       const link = document.querySelector('.DocSearch-Help a');
       expect(link).toBeInTheDocument();
-      expect(link.getAttribute('href')).toBe(
+      expect(link?.getAttribute('href')).toBe(
         'https://github.com/algolia/docsearch/issues/new?title=q'
       );
+    });
+  });
+
+  describe('whitespace-only queries', () => {
+    it('does not trigger a keyword search', async () => {
+      const search = vi.fn(noResultSearch);
+
+      render(
+        <DocSearch
+          transformSearchClient={(searchClient) => ({
+            ...searchClient,
+            search,
+          })}
+        />
+      );
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      await act(async () => {
+        fireEvent.input(await screen.findByPlaceholderText('Search docs'), {
+          target: { value: ' \t\n ' },
+        });
+      });
+
+      expect(search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ask AI integration', () => {
+    it('updates placeholder when ask AI is available', async () => {
+      render(<DocSearchAI />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      expect(
+        screen.getByPlaceholderText('Search docs or ask AI a question')
+      ).toBeInTheDocument();
+    });
+
+    it('opens ask AI screen and returns to search', async () => {
+      render(
+        <DocSearchAI
+          transformSearchClient={(searchClient) => ({
+            ...searchClient,
+            search: noResultSearch,
+          })}
+        />
+      );
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      await act(async () => {
+        fireEvent.input(
+          await screen.findByPlaceholderText(
+            'Search docs or ask AI a question'
+          ),
+          {
+            target: { value: 'hello' },
+          }
+        );
+      });
+
+      await act(async () => {
+        fireEvent.click(
+          await screen.findByText('hello', {
+            selector: '.DocSearch-Hit-AskAIButton-title-query',
+          })
+        );
+      });
+
+      expect(
+        document.querySelector('.DocSearch-AskAiScreen')
+      ).toBeInTheDocument();
+      expect(await screen.findByText('hello')).toBeInTheDocument();
+
+      // could be "Answering..." or "Ask another question..."
+      // where "Ask another question..." is actually an input's placeholder text
+      expect(
+        screen.queryByText('Answering...') ??
+          screen.queryByPlaceholderText('Ask another question...')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('portalContainer', () => {
+    it('renders the modal inside document.body by default', async () => {
+      render(<DocSearch />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      const portal = document.querySelector('.DocSearch-Container');
+
+      expect(portal).toBeInTheDocument();
+      expect(portal?.parentElement).toBe(document.body);
+    });
+
+    it('renders the modal inside the provided portal container', async () => {
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      render(<DocSearch portalContainer={container} />);
+
+      await act(async () => {
+        fireEvent.click(await screen.findByText('Search'));
+      });
+
+      const portal = container.querySelector('.DocSearch-Container');
+
+      expect(portal).toBeInTheDocument();
+      expect(portal?.parentElement).toBe(container);
+
+      // clean up manually created container
+      container.remove();
+    });
+  });
+
+  describe('Theme', () => {
+    const html = document.documentElement;
+    it('light theme', () => {
+      render(<DocSearch theme="light" />);
+      expect(html.getAttribute('data-theme')).toBe('light');
+    });
+    it('dark theme', () => {
+      render(<DocSearch theme="dark" />);
+      expect(html.getAttribute('data-theme')).toBe('dark');
     });
   });
 });

@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:js-lib", "algolia"],
+  "extends": ["config:js-lib", "github>algolia/renovate-config-algolia"],
   "baseBranches": ["chore/renovateBaseBranch"],
   "packageRules": [
     {
