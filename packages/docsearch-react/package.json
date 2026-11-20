@@ -70,7 +70,7 @@
     "tsdown": "0.22.7",
     "typescript": "5.7.3",
     "typesense-docsearch-core": "5.0.2-0",
-    "vitest": "3.0.2"
+    "vitest": "4.1.12"
   },
   "peerDependencies": {
     "@types/react": ">= 16.8.0 < 20.0.0",

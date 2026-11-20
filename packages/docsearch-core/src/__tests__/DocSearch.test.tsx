@@ -331,6 +331,7 @@ describe('typesense-docsearch-core', () => {
     const onAskAiToggle = vi.fn();
 
     afterEach(() => {
+      vi.clearAllMocks();
       vi.restoreAllMocks();
     });
 
