@@ -14,6 +14,16 @@ describe('sanitizeUserInput', () => {
   it('strips tags then escapes remaining text', () => {
     expect(sanitizeUserInput('<b>hello</b> & world')).toBe('hello &amp; world');
   });
+
+  it('never leaves a raw tag opener in the output', () => {
+    expect(sanitizeUserInput('<scr<script>ipt>alert(1)</script>')).toBe(
+      'ipt&gt;alert(1)'
+    );
+    expect(sanitizeUserInput('<<b>img src=x onerror=alert(1)>')).toBe(
+      'img src=x onerror=alert(1)&gt;'
+    );
+    expect(sanitizeUserInput('<script')).toBe('&lt;script');
+  });
 });
 
 describe('sanitizeUrl', () => {

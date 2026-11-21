@@ -10,7 +10,12 @@ export function escapeHtml(unsafe: string): string {
 
 /** Strips HTML tags and escapes the remainder for plain-text React children. */
 export function sanitizeUserInput(input: string): string {
-  const withoutTags = input.replace(/<[^>]*>/g, '');
+  let withoutTags = input;
+  let previous: string;
+  do {
+    previous = withoutTags;
+    withoutTags = withoutTags.replace(/<[^>]*>/g, '');
+  } while (withoutTags !== previous);
   return escapeHtml(withoutTags);
 }
 
